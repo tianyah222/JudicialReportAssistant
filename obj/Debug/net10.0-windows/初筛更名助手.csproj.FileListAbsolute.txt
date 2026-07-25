@@ -1,0 +1,17 @@
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\初筛更名助手.Form1.resources
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\初筛更名助手.csproj.GenerateResource.cache
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\初筛更名助手.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\初筛更名助手.AssemblyInfoInputs.cache
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\初筛更名助手.AssemblyInfo.cs
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\初筛更名助手.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\bin\Debug\net10.0-windows\初筛更名助手.exe
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\bin\Debug\net10.0-windows\初筛更名助手.deps.json
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\bin\Debug\net10.0-windows\初筛更名助手.runtimeconfig.json
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\bin\Debug\net10.0-windows\初筛更名助手.dll
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\bin\Debug\net10.0-windows\初筛更名助手.pdb
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\初筛更名助手.dll
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\refint\初筛更名助手.dll
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\初筛更名助手.pdb
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\初筛更名助手.genruntimeconfig.cache
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\ref\初筛更名助手.dll
+C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\obj\Debug\net10.0-windows\初筛更名助手.HairOCRForm.resources
