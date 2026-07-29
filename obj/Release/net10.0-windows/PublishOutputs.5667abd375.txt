@@ -1,5 +1,0 @@
-E:\zijianruanjian\初筛更名助手.exe
-E:\zijianruanjian\初筛更名助手.dll
-E:\zijianruanjian\初筛更名助手.deps.json
-E:\zijianruanjian\初筛更名助手.runtimeconfig.json
-E:\zijianruanjian\初筛更名助手.pdb
