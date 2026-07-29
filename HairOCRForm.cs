@@ -12,7 +12,12 @@ namespace 初筛更名助手
     {//识别区域
         Rectangle nameArea;
         Rectangle idArea;
+        //条码识别区域
+        Rectangle barcodeArea;
 
+        //白色标签区域
+        Rectangle labelArea;
+        //自动体检号区域（暂时保留）
         string currentBox = "";
         Point mouseDownPoint;
 
@@ -20,6 +25,11 @@ namespace 初筛更名助手
         string resizeDirection = "";
         bool resizing = false;
         List<string> imageFiles = new List<string>();
+        Dictionary<string, Rectangle> labelAreaList =
+    new Dictionary<string, Rectangle>();
+
+        Dictionary<string, Rectangle> barcodeAreaList =
+            new Dictionary<string, Rectangle>();
         string areaFile = Path.Combine(
       Application.StartupPath,
       "area.config.txt"
@@ -37,16 +47,21 @@ namespace 初筛更名助手
 
             dgvResult.Columns.Add("colImage", "图片名称");
             dgvResult.Columns.Add("colName", "姓名");
+            dgvResult.Columns.Add("colBarcode", "条码号");
             dgvResult.Columns.Add("colID", "体检号");
             dgvResult.Columns.Add("colStatus", "识别状态");
             dgvResult.Columns["colImage"].Width = 180;
-            dgvResult.Columns["colName"].Width = 120;
+            dgvResult.Columns["colName"].Width = 80;
+            dgvResult.Columns["colBarcode"].Width = 120;
             dgvResult.Columns["colID"].Width = 120;
             dgvResult.Columns["colStatus"].Width = 80;
             dgvResult.AllowUserToAddRows = false;
             dgvResult.ReadOnly = true;
             dgvResult.AutoSizeColumnsMode =
                 DataGridViewAutoSizeColumnsMode.Fill;
+            dgvResult.RowTemplate.Height = 25;
+            dgvResult.AutoSizeRowsMode =
+                DataGridViewAutoSizeRowsMode.None;
         }
 
         private Point PictureBoxToImage(Point p)
@@ -81,6 +96,7 @@ namespace 初筛更名助手
             files.AddRange(Directory.GetFiles(folder, "*.jpg"));
             files.AddRange(Directory.GetFiles(folder, "*.jpeg"));
             files.AddRange(Directory.GetFiles(folder, "*.png"));
+            MessageBox.Show("实际读取图片数量：" + files.Count);
             imageFiles.Clear();
             imageFiles.AddRange(files);
 
@@ -98,25 +114,62 @@ namespace 初筛更名助手
             //批量加入结果表
             foreach (string file in files)
             {
-                dgvResult.Rows.Add(
-                    Path.GetFileName(file),
-                    "",
-                    "",
-                    "",
-                    "待识别"
-                );
+                try
+                {
+                    BarcodeScanner scanner = new BarcodeScanner();
+
+                    BarcodeInfo info =
+                        scanner.ReadBarcode(file);
+
+                    //识别结果
+                    string status;
+                    string barcode = "";
+
+
+                    if (info != null)
+                    {
+                        //保存区域
+                        barcodeArea = info.Location;
+                        labelArea = info.LabelArea;
+
+                        barcodeAreaList[file] = info.Location;
+                        labelAreaList[file] = info.LabelArea;
+
+
+                        barcode = info.Code;
+                        status = "定位成功";
+                    }
+                    else
+                    {
+                        status = "未找到条码";
+                    }
+
+
+                    //所有图片都加入表格
+                    dgvResult.Rows.Add(
+                        Path.GetFileName(file),   //图片名称
+                        "",                       //姓名
+                        barcode,                  //条码号
+                        "",                       //体检号
+                        status                    //识别状态
+                    );
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        file + "\r\n" + ex.Message
+                    );
+                }
             }
 
 
-            //显示第一张
-            pbPhoto.Image = Image.FromFile(files[0]);
-            pbPhoto.Refresh();
-
-            MessageBox.Show(
-     "加载完成，共 " + files.Count + " 张照片"
- );
+            //循环结束后再显示第一张图片
+            if (files.Count > 0)
+            {
+                pbPhoto.Image = Image.FromFile(files[0]);
+                pbPhoto.Refresh();
+            }
         }
-
         private void btnSelectPhoto_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog dialog = new FolderBrowserDialog();
@@ -169,40 +222,70 @@ namespace 初筛更名助手
             if (pbPhoto.Image == null)
                 return;
 
-
             float scaleX = (float)pbPhoto.Width / pbPhoto.Image.Width;
             float scaleY = (float)pbPhoto.Height / pbPhoto.Image.Height;
 
-
             Rectangle DrawRect(Rectangle rect)
             {
+                if (rect.Width <= 0 || rect.Height <= 0)
+                {
+                    return new Rectangle(0, 0, 1, 1);
+                }
+
+
+                int x = (int)(rect.X * scaleX);
+                int y = (int)(rect.Y * scaleY);
+                int w = (int)(rect.Width * scaleX);
+                int h = (int)(rect.Height * scaleY);
+
+
+                if (w <= 0)
+                    w = 1;
+
+                if (h <= 0)
+                    h = 1;
+
+
                 return new Rectangle(
-                    (int)(rect.X * scaleX),
-                    (int)(rect.Y * scaleY),
-                    (int)(rect.Width * scaleX),
-                    (int)(rect.Height * scaleY)
+                    x,
+                    y,
+                    w,
+                    h
                 );
             }
-
 
             Pen pen = new Pen(Color.Red, 3);
 
 
-            e.Graphics.DrawRectangle(
-                pen,
-                DrawRect(nameArea));
+            //姓名区域
+            if (nameArea.Width > 0 &&
+                nameArea.Height > 0)
+            {
+                e.Graphics.DrawRectangle(
+                    pen,
+                    DrawRect(nameArea));
+            }
 
 
-            e.Graphics.DrawRectangle(
-                pen,
-                DrawRect(idArea));
+            //体检号区域
+            if (idArea.Width > 0 &&
+                idArea.Height > 0)
+            {
+                e.Graphics.DrawRectangle(
+                    pen,
+                    DrawRect(idArea));
+            }
+            //根据当前图片绘制条码和标签区域
+          
 
-
-
-
-            pen.Dispose();
+            if (labelArea.Width > 0 &&
+                labelArea.Height > 0)
+            {
+                e.Graphics.DrawRectangle(
+                    pen,
+                    DrawRect(labelArea));
+            }
         }
-
         private void pbPhoto_MouseDown(object sender, MouseEventArgs e)
         {
             mouseDownPoint = PictureBoxToImage(e.Location);
@@ -427,8 +510,26 @@ namespace 初筛更名助手
 
             //加载新图片
             pbPhoto.Image = Image.FromFile(file);
+            //恢复条码框
+            if (barcodeAreaList.ContainsKey(file))
+            {
+                barcodeArea = barcodeAreaList[file];
+            }
+            else
+            {
+                barcodeArea = Rectangle.Empty;
+            }
 
 
+            //恢复标签框
+            if (labelAreaList.ContainsKey(file))
+            {
+                labelArea = labelAreaList[file];
+            }
+            else
+            {
+                labelArea = Rectangle.Empty;
+            }
             //刷新红框
             pbPhoto.Refresh();
         }
@@ -436,7 +537,7 @@ namespace 初筛更名助手
         private void btnSaveArea_Click(object sender, EventArgs e)
         {
             if (nameArea.Width == 0 ||
-               idArea.Width == 0 )
+               idArea.Width == 0)
             {
                 MessageBox.Show("请先绘制识别区域！");
                 return;
