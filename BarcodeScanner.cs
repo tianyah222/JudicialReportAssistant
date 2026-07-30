@@ -51,15 +51,53 @@ namespace 初筛更名助手
                     return rect;
             }
         }
-        private Rectangle FindWhiteLabel(
-     Bitmap image,
-     Rectangle barcodeRect)
+        private Rectangle ConvertLabelRectangle(
+    Rectangle rect,
+    int rotation,
+    int width,
+    int height)
         {
-            MessageBox.Show(
-                "条码区域：" + barcodeRect.ToString()
-            );
+            switch (rotation)
+            {
+                case 0:
+                    return rect;
 
 
+                case 1: //90°
+                    return new Rectangle(
+                        height - rect.Bottom,
+                        rect.X,
+                        rect.Height,
+                        rect.Width
+                    );
+
+
+                case 2: //180°
+                    return new Rectangle(
+                        width - rect.Right,
+                        height - rect.Bottom,
+                        rect.Width,
+                        rect.Height
+                    );
+
+
+                case 3: //270°
+                    return new Rectangle(
+                        rect.Y,
+                        width - rect.Right,
+                        rect.Height,
+                        rect.Width
+                    );
+
+
+                default:
+                    return rect;
+            }
+        }
+        private Rectangle FindWhiteLabel(
+      Bitmap image,
+      Rectangle barcodeRect)
+        {
             Rectangle label;
 
 
@@ -67,20 +105,20 @@ namespace 初筛更名助手
             if (barcodeRect.Width > barcodeRect.Height)
             {
                 label = new Rectangle(
-                    barcodeRect.X -100,
-                    barcodeRect.Y - 130,
+                    barcodeRect.X - 100,
+                    barcodeRect.Y - 120,
                     450,
                     280
                 );
             }
             else
             {
-                //竖向条码
+                //纵向条码
                 label = new Rectangle(
-                    barcodeRect.X - 260,
-                    barcodeRect.Y - 80,
-                    330,
-                    420
+                    barcodeRect.X - 180,
+                    barcodeRect.Y - 120,
+                    350,
+                    500
                 );
             }
 
@@ -103,6 +141,7 @@ namespace 初筛更名助手
 
             return label;
         }
+        
         public BarcodeInfo ReadBarcode(string imagePath)
         {
             try
@@ -141,7 +180,7 @@ namespace 初筛更名助手
                         BarcodeReader reader =
    new BarcodeReader
    {
-       AutoRotate = true,
+       AutoRotate = false,
 
        Options = new ZXing.Common.DecodingOptions
        {
@@ -293,11 +332,18 @@ namespace 初筛更名助手
                                     original.Height
                                 );
                             //根据条码位置寻找白色标签区域
+                            Rectangle labelRectRotated =
+     FindWhiteLabel(
+         testImage,
+         rectRotated
+     );
                             Rectangle labelRect =
-      FindWhiteLabel(
-          original,
-          rect
-      );
+     ConvertLabelRectangle(
+         labelRectRotated,
+         i,
+         original.Width,
+         original.Height
+     );
                             labelRect = Rectangle.Intersect(
                                 labelRect,
                                 new Rectangle(
@@ -313,9 +359,6 @@ namespace 初筛更名助手
                             if (labelRect.Width > 0 &&
                                 labelRect.Height > 0)
                             {
-                                MessageBox.Show(
-    "最终保存区域：" + labelRect.ToString()
-);
                                 string testPath = Path.Combine(
                                     Application.StartupPath,
                                     "测试标签区域_" +
