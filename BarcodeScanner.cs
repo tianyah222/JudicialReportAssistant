@@ -134,14 +134,73 @@ namespace 初筛更名助手
             );
 
 
-            MessageBox.Show(
-                "生成标签区域：" + label.ToString()
-            );
+            // MessageBox.Show(
+            // "生成标签区域：" + label.ToString()
+            //  );
 
 
             return label;
         }
-        
+        private List<Bitmap> CreateRotateLabels(Bitmap image)
+        {
+            List<Bitmap> list = new List<Bitmap>();
+
+            //0°
+            list.Add(new Bitmap(image));
+
+
+            //90°
+            Bitmap img90 = new Bitmap(image);
+            img90.RotateFlip(
+                RotateFlipType.Rotate90FlipNone);
+            list.Add(img90);
+
+
+            //180°
+            Bitmap img180 = new Bitmap(image);
+            img180.RotateFlip(
+                RotateFlipType.Rotate180FlipNone);
+            list.Add(img180);
+
+
+            //270°
+            Bitmap img270 = new Bitmap(image);
+            img270.RotateFlip(
+                RotateFlipType.Rotate270FlipNone);
+            list.Add(img270);
+
+
+            return list;
+        }
+        private Bitmap RotateLabel(
+    Bitmap image,
+    int rotation)
+        {
+            Bitmap result = new Bitmap(image);
+
+            switch (rotation)
+            {
+                case 0:
+                    break;
+
+                case 1:
+                    result.RotateFlip(
+                        RotateFlipType.Rotate90FlipNone);
+                    break;
+
+                case 2:
+                    result.RotateFlip(
+                        RotateFlipType.Rotate180FlipNone);
+                    break;
+
+                case 3:
+                    result.RotateFlip(
+                        RotateFlipType.Rotate270FlipNone);
+                    break;
+            }
+
+            return result;
+        }
         public BarcodeInfo ReadBarcode(string imagePath)
         {
             try
@@ -307,13 +366,13 @@ namespace 初筛更名助手
                             maxX /= 2;
                             maxY /= 2;
                             //加入这里
-                            MessageBox.Show(
-                                "ZXing定位点：" +
-                                "\nminX=" + minX +
-                                "\nminY=" + minY +
-                                "\nmaxX=" + maxX +
-                                "\nmaxY=" + maxY
-                            );
+                            // MessageBox.Show(
+                            // "ZXing定位点：" +
+                            //  "\nminX=" + minX +
+                            // "\nminY=" + minY +
+                            // "\nmaxX=" + maxX +
+                            // "\nmaxY=" + maxY
+                            // );
                             Rectangle rectRotated =
      new Rectangle(
          (int)minX - 30,
@@ -337,6 +396,7 @@ namespace 初筛更名助手
          testImage,
          rectRotated
      );
+
                             Rectangle labelRect =
      ConvertLabelRectangle(
          labelRectRotated,
@@ -366,10 +426,63 @@ namespace 初筛更名助手
                                 );
 
                                 using (Bitmap cropLabel = original.Clone(
-                                    labelRect,
-                                    original.PixelFormat))
+    labelRect,
+    original.PixelFormat))
                                 {
-                                    cropLabel.Save(testPath);
+
+                                    Bitmap correctLabel =
+                                        RotateLabel(
+                                            cropLabel,
+                                            i
+                                        );
+
+
+                                    string correctPath = Path.Combine(
+                                        Application.StartupPath,
+                                        "校正标签区域_" +
+                                        Path.GetFileName(imagePath)
+                                    );
+
+
+                                    List<Bitmap> rotateLabels =
+    CreateRotateLabels(cropLabel);
+
+
+                                    OCRHelper ocr = new OCRHelper();
+
+                                    int index = 0;
+
+                                    foreach (Bitmap img in rotateLabels)
+                                    {
+
+                                        //保存调试图片
+                                        string path = Path.Combine(
+                                            Application.StartupPath,
+                                            "方向" + index + "_" +
+                                            Path.GetFileName(imagePath)
+                                        );
+
+                                        img.Save(path);
+
+
+                                        //调用OCR（目前返回空）
+                                        string text = ocr.ReadText(img);
+
+
+                                        Console.WriteLine(
+    "方向" + index +
+    " OCR结果：" +
+    text
+);
+
+
+                                        img.Dispose();
+
+                                        index++;
+                                    }
+
+
+                                    correctLabel.Dispose();
                                 }
                             }
 
