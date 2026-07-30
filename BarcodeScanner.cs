@@ -8,7 +8,101 @@ namespace 初筛更名助手
 {
     public class BarcodeScanner
     {
+        private Rectangle ConvertRectangle(
+       Rectangle rect,
+       int rotation,
+       int width,
+       int height)
+        {
+            switch (rotation)
+            {
+                case 0:
+                    return rect;
 
+
+                case 1: //90度
+                    return new Rectangle(
+                        rect.Y,
+                        width - rect.Right,
+                        rect.Height,
+                        rect.Width
+                    );
+
+
+                case 2: //180度
+                    return new Rectangle(
+                        width - rect.Right,
+                        height - rect.Bottom,
+                        rect.Width,
+                        rect.Height
+                    );
+
+
+                case 3: //270度
+                    return new Rectangle(
+                        height - rect.Bottom,
+                        rect.X,
+                        rect.Height,
+                        rect.Width
+                    );
+
+
+                default:
+                    return rect;
+            }
+        }
+        private Rectangle FindWhiteLabel(
+     Bitmap image,
+     Rectangle barcodeRect)
+        {
+            MessageBox.Show(
+                "条码区域：" + barcodeRect.ToString()
+            );
+
+
+            Rectangle label;
+
+
+            //横向条码
+            if (barcodeRect.Width > barcodeRect.Height)
+            {
+                label = new Rectangle(
+                    barcodeRect.X -100,
+                    barcodeRect.Y - 130,
+                    450,
+                    280
+                );
+            }
+            else
+            {
+                //竖向条码
+                label = new Rectangle(
+                    barcodeRect.X - 260,
+                    barcodeRect.Y - 80,
+                    330,
+                    420
+                );
+            }
+
+
+            label = Rectangle.Intersect(
+                label,
+                new Rectangle(
+                    0,
+                    0,
+                    image.Width,
+                    image.Height
+                )
+            );
+
+
+            MessageBox.Show(
+                "生成标签区域：" + label.ToString()
+            );
+
+
+            return label;
+        }
         public BarcodeInfo ReadBarcode(string imagePath)
         {
             try
@@ -118,11 +212,11 @@ namespace 初筛更名助手
                             gray.Dispose();
                         }
 
-                        if (result != null)
+                        if (result == null)
                         {
                             Console.WriteLine(
-      "第" + i + "次旋转失败"
-  );
+                                "第" + i + "次旋转失败"
+                            );
                         }
 
                         if (result != null)
@@ -148,22 +242,6 @@ namespace 初筛更名助手
                                 };
                             }
 
-
-                            if (points == null || points.Length == 0)
-                            {
-                                resizeImage.Dispose();
-                                testImage.Dispose();
-
-                                return new BarcodeInfo
-                                {
-                                    Code = result.Text,
-                                    Location = Rectangle.Empty,
-                                    LabelArea = Rectangle.Empty,
-                                    Rotation = i * 90
-                                };
-                            }
-
-
                             float minX = float.MaxValue;
                             float minY = float.MaxValue;
                             float maxX = 0;
@@ -184,21 +262,42 @@ namespace 初筛更名助手
                                 if (p.Y > maxY)
                                     maxY = p.Y;
                             }
-                 
+                            // ZXing是在2倍图片上识别，需要换算回原图坐标
+                            minX /= 2;
+                            minY /= 2;
+                            maxX /= 2;
+                            maxY /= 2;
+                            //加入这里
+                            MessageBox.Show(
+                                "ZXing定位点：" +
+                                "\nminX=" + minX +
+                                "\nminY=" + minY +
+                                "\nmaxX=" + maxX +
+                                "\nmaxY=" + maxY
+                            );
+                            Rectangle rectRotated =
+     new Rectangle(
+         (int)minX - 30,
+         (int)minY - 20,
+         (int)(maxX - minX) + 60,
+         (int)(maxY - minY) + 40
+     );
+
+
+                            //转换回原图坐标
                             Rectangle rect =
-new Rectangle(
-    (int)minX - 30,
-    (int)minY - 20,
-    (int)(maxX - minX) + 60,
-    (int)(maxY - minY) + 40
-);
-                            //根据条码位置估算白色标签区域
-                            Rectangle labelRect = new Rectangle(
-    (int)minX - 300,
-    (int)minY - 150,
-    700,
-    350
-);
+                                ConvertRectangle(
+                                    rectRotated,
+                                    i,
+                                    original.Width,
+                                    original.Height
+                                );
+                            //根据条码位置寻找白色标签区域
+                            Rectangle labelRect =
+      FindWhiteLabel(
+          original,
+          rect
+      );
                             labelRect = Rectangle.Intersect(
                                 labelRect,
                                 new Rectangle(
@@ -208,9 +307,33 @@ new Rectangle(
                                     original.Height
                                 )
                             );
-                         
+                            //==============================
+                            // 测试标签区域截图
+                            //==============================
+                            if (labelRect.Width > 0 &&
+                                labelRect.Height > 0)
+                            {
+                                MessageBox.Show(
+    "最终保存区域：" + labelRect.ToString()
+);
+                                string testPath = Path.Combine(
+                                    Application.StartupPath,
+                                    "测试标签区域_" +
+                                    Path.GetFileName(imagePath)
+                                );
+
+                                using (Bitmap cropLabel = original.Clone(
+                                    labelRect,
+                                    original.PixelFormat))
+                                {
+                                    cropLabel.Save(testPath);
+                                }
+                            }
+
+                            //释放图片
                             resizeImage.Dispose();
                             testImage.Dispose();
+                            //返回识别结果
                             return new BarcodeInfo
                             {
                                 Code = result.Text,
