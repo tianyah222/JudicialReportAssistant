@@ -1,0 +1,88 @@
+{
+  "program": "初筛工具箱",
+  "version": "5.1",
+  "module": "批量重命名",
+  "time": "2026-08-01 15:21:06",
+  "success": true,
+  "total": 8,
+  "successCount": 6,
+  "duplicateCount": 2,
+  "manualCount": 0,
+  "failedCount": 0,
+  "results": [
+    {
+      "oldName": "1.jpg",
+      "newName": "26549_102607134172.jpg",
+      "name": "26549",
+      "nameType": "数字编码",
+      "sampleNo": "102607134172",
+      "direction": 90,
+      "score": 210,
+      "status": "成功"
+    },
+    {
+      "oldName": "2.jpg",
+      "newName": "26549_102607134172.jpg",
+      "name": "26549",
+      "sampleNo": "102607134172",
+      "status": "重复文件"
+    },
+    {
+      "oldName": "3.jpg",
+      "newName": "261232_102607134855.jpg",
+      "name": "261232",
+      "nameType": "数字编码",
+      "sampleNo": "102607134855",
+      "direction": 180,
+      "score": 210,
+      "status": "成功"
+    },
+    {
+      "oldName": "4.jpg",
+      "newName": "261235_102607134858.jpg",
+      "name": "261235",
+      "nameType": "数字编码",
+      "sampleNo": "102607134858",
+      "direction": 180,
+      "score": 210,
+      "status": "成功"
+    },
+    {
+      "oldName": "5.jpg",
+      "newName": "胡国香_102607150268.jpg",
+      "name": "胡国香",
+      "nameType": "中文姓名",
+      "sampleNo": "102607150268",
+      "direction": 180,
+      "score": 210,
+      "status": "成功"
+    },
+    {
+      "oldName": "6.jpeg",
+      "newName": "刘宁_102602100034.jpeg",
+      "name": "刘宁",
+      "nameType": "中文姓名",
+      "sampleNo": "102602100034",
+      "direction": 90,
+      "score": 210,
+      "status": "成功"
+    },
+    {
+      "oldName": "7.jpg",
+      "newName": "刘湘华_102607150270.jpg",
+      "name": "刘湘华",
+      "nameType": "中文姓名",
+      "sampleNo": "102607150270",
+      "direction": 180,
+      "score": 210,
+      "status": "成功"
+    },
+    {
+      "oldName": "8.jpg",
+      "newName": "胡国香_102607150268.jpg",
+      "name": "胡国香",
+      "sampleNo": "102607150268",
+      "status": "重复文件"
+    }
+  ]
+}
