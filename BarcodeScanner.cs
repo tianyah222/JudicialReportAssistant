@@ -437,54 +437,32 @@ namespace 初筛更名助手
                                         );
 
 
-                                    string correctPath = Path.Combine(
-                                        Application.StartupPath,
-                                        "校正标签区域_" +
-                                        Path.GetFileName(imagePath)
-                                    );
-
-
-                                    List<Bitmap> rotateLabels =
-    CreateRotateLabels(cropLabel);
-
-
-                                    OCRHelper ocr = new OCRHelper();
-
-                                    int index = 0;
-
-                                    foreach (Bitmap img in rotateLabels)
+                                    using (Bitmap ocrImage = original.Clone(
+     labelRect,
+     original.PixelFormat))
                                     {
 
-                                        //保存调试图片
-                                        string path = Path.Combine(
+                                        string ocrPath = Path.Combine(
                                             Application.StartupPath,
-                                            "方向" + index + "_" +
+                                            "测试标签区域_" +
                                             Path.GetFileName(imagePath)
                                         );
 
-                                        img.Save(path);
+
+                                        ocrImage.Save(ocrPath);
 
 
-                                        //调用OCR（目前返回空）
-                                        string text = ocr.ReadText(img);
+                                        OCRHelper ocr = new OCRHelper();
 
 
-                                        Console.WriteLine(
-    "方向" + index +
-    " OCR结果：" +
-    text
-);
+                                        string ocrText =
+                                            ocr.ReadText(ocrPath);
 
 
-                                        img.Dispose();
+                                        // MessageBox.Show(ocrText);
 
-                                        index++;
                                     }
-
-
-                                    correctLabel.Dispose();
                                 }
-                            }
 
                             //释放图片
                             resizeImage.Dispose();
@@ -509,6 +487,7 @@ namespace 初筛更名助手
                       );
                 return null;
 
+            }
             }
             catch (Exception ex)
             {

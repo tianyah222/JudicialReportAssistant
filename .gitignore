@@ -8,6 +8,7 @@ Release/
 *.exe
 *.dll
 *.pdb
-
+__pycache__/
+*.pyc
 测试*.jpg
 体检号测试*.jpg
