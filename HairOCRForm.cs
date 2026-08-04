@@ -5,11 +5,14 @@ using System.Data;
 using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
-
-namespace 初筛更名助手
+using System.Text.Json;
+namespace 初筛工具箱
 {
     public partial class HairOCRForm : Form
-    {//识别区域
+    {
+        //当前委托方配置
+        ClientConfig currentConfig;
+        //识别区域
         Rectangle nameArea;
         Rectangle idArea;
         //条码识别区域
@@ -34,11 +37,14 @@ namespace 初筛更名助手
       Application.StartupPath,
       "area.config.txt"
   );
+        string configFolder = Path.Combine(
+    Application.StartupPath,
+    "Config"
+);
         public HairOCRForm()
         {
             InitializeComponent();
             InitResultTable();
-            LoadAreaConfig();
         }
 
         private void InitResultTable()
@@ -81,6 +87,11 @@ namespace 初筛更名助手
         }
         private void btnStartOCR_Click(object sender, EventArgs e)
         {
+            if (currentConfig == null)
+            {
+                MessageBox.Show("请先选择委托方！");
+                return;
+            }
             if (string.IsNullOrEmpty(txtPhotoFolder.Text))
             {
                 MessageBox.Show("请先选择照片文件夹！");
@@ -121,38 +132,95 @@ namespace 初筛更名助手
                     BarcodeInfo info =
                         scanner.ReadBarcode(file);
 
+
                     //识别结果
-                    string status;
+                    string status = "未找到条码";
                     string barcode = "";
+
+                    string name = "";
+                    string sampleNo = "";
 
 
                     if (info != null)
                     {
-                        //保存区域
-                        barcodeArea = info.Location;
-                        labelArea = info.LabelArea;
-
-                        barcodeAreaList[file] = info.Location;
-                        labelAreaList[file] = info.LabelArea;
-
-
                         barcode = info.Code;
                         status = "定位成功";
-                    }
-                    else
-                    {
-                        status = "未找到条码";
+
+
+                        //条码框使用ZXing自动定位
+                        barcodeAreaList[file] = info.Location;
+
+
+                        //委托方配置
+                        if (currentConfig != null)
+                        {
+                            labelAreaList[file] = info.LabelArea;
+
+
+                            //====================
+                            //标签区域OCR
+                            //====================
+
+                            OCRHelper helper = new OCRHelper();
+
+
+                            //截取BarcodeScanner找到的标签区域
+                            using (Bitmap img = new Bitmap(file))
+                            {
+                                using (Bitmap label =
+                                    img.Clone(
+                                        info.LabelArea,
+                                        img.PixelFormat))
+                                {
+
+                                    string temp =
+                                        Path.Combine(
+                                            Application.StartupPath,
+                                            "OCR临时",
+                                            Path.GetFileName(file)
+                                        );
+
+
+                                    if (!Directory.Exists(
+                                        Path.GetDirectoryName(temp)))
+                                    {
+                                        Directory.CreateDirectory(
+                                            Path.GetDirectoryName(temp));
+                                    }
+
+
+                                    label.Save(temp);
+
+
+                                    OCRResult result =
+                                        helper.ReadText(temp);
+
+
+                                    if (result != null)
+                                    {
+                                        name = result.name;
+
+
+                                        if (currentConfig.NeedID)
+                                        {
+                                            sampleNo = result.sampleNo;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
 
 
-                    //所有图片都加入表格
+                    //所有图片加入结果表
                     dgvResult.Rows.Add(
-                        Path.GetFileName(file),   //图片名称
-                        "",                       //姓名
-                        barcode,                  //条码号
-                        "",                       //体检号
-                        status                    //识别状态
+                        Path.GetFileName(file),
+                        name,
+                        barcode,
+                        sampleNo,
+                        status
                     );
+
                 }
                 catch (Exception ex)
                 {
@@ -161,7 +229,6 @@ namespace 初筛更名助手
                     );
                 }
             }
-
 
             //循环结束后再显示第一张图片
             if (files.Count > 0)
@@ -257,9 +324,8 @@ namespace 初筛更名助手
             Pen pen = new Pen(Color.Red, 3);
 
 
-            //姓名区域
-            if (nameArea.Width > 0 &&
-                nameArea.Height > 0)
+            //手动区域仅绘制时显示
+            if (currentBox == "name")
             {
                 e.Graphics.DrawRectangle(
                     pen,
@@ -267,16 +333,14 @@ namespace 初筛更名助手
             }
 
 
-            //体检号区域
-            if (idArea.Width > 0 &&
-                idArea.Height > 0)
+            if (currentBox == "id")
             {
                 e.Graphics.DrawRectangle(
                     pen,
                     DrawRect(idArea));
             }
             //根据当前图片绘制条码和标签区域
-          
+
 
             if (labelArea.Width > 0 &&
                 labelArea.Height > 0)
@@ -284,6 +348,13 @@ namespace 初筛更名助手
                 e.Graphics.DrawRectangle(
                     pen,
                     DrawRect(labelArea));
+            }
+            if (barcodeArea.Width > 0 &&
+   barcodeArea.Height > 0)
+            {
+                e.Graphics.DrawRectangle(
+                    pen,
+                    DrawRect(barcodeArea));
             }
         }
         private void pbPhoto_MouseDown(object sender, MouseEventArgs e)
@@ -478,14 +549,112 @@ namespace 初筛更名助手
 
         private void HairOCRForm_Load(object sender, EventArgs e)
         {
+            cmbClient.Items.Clear();
 
+            cmbClient.Items.Add("长沙医检");
+            cmbClient.Items.Add("浏阳公安");
+
+            cmbClient.SelectedIndex = 0;
+        }
+
+        private void LoadClientList()
+        {
+            cmbClient.Items.Clear();
+
+
+            if (!Directory.Exists(configFolder))
+            {
+                MessageBox.Show(
+                    "配置文件夹不存在：\n" + configFolder
+                );
+                return;
+            }
+
+
+            string[] files = Directory.GetFiles(
+                configFolder,
+                "*.json"
+            );
+
+
+            foreach (string file in files)
+            {
+                cmbClient.Items.Add(
+                    Path.GetFileNameWithoutExtension(file)
+                );
+            }
+
+
+            if (cmbClient.Items.Count > 0)
+            {
+                cmbClient.SelectedIndex = 0;
+            }
+        }
+        private void LoadClientConfig()
+        {
+            string file = "";
+
+            if (cmbClient.Text == "长沙医检")
+            {
+                file = "Config\\长沙医检.json";
+            }
+            else if (cmbClient.Text == "浏阳公安")
+            {
+                file = "Config\\浏阳.json";
+            }
+
+
+            if (File.Exists(file))
+            {
+                string json = File.ReadAllText(file);
+
+                currentConfig =
+                    System.Text.Json.JsonSerializer.Deserialize<ClientConfig>(json);
+
+            }
+        }
+        private void cmbClient_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cmbClient.SelectedItem == null)
+                return;
+
+
+            string client =
+                cmbClient.SelectedItem.ToString();
+
+            string file = Path.Combine(
+                configFolder,
+                client + ".json"
+            );
+
+
+            if (!File.Exists(file))
+            {
+                MessageBox.Show("找不到配置：" + file);
+                return;
+            }
+
+
+            string json = File.ReadAllText(file);
+
+
+            currentConfig =
+                JsonSerializer.Deserialize<ClientConfig>(json);
+
+            if (currentConfig != null)
+            {
+                pbPhoto.Invalidate();
+            }
         }
 
         private void dgvResult_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
         }
+        private void btnExport_Click(object sender, EventArgs e)
+        {
 
+        }
         private void dgvResult_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             //防止点击表头
@@ -624,5 +793,6 @@ namespace 初筛更名助手
 
             }
         }
+
     }
 }

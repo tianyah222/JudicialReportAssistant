@@ -13,18 +13,13 @@ def classify_text(text):
         result.append("sample_no")
 
 
-    # 数字/数字
-    if re.match(r"^\d+/\d+$", text):
-        result.append("sample_no")
-
-
     # 中文姓名
     if re.fullmatch(r"[\u4e00-\u9fa5]{2,4}", text):
         result.append("name")
 
 
     # 数字编号姓名
-    if re.fullmatch(r"\d{4,6}", text):
+    if re.fullmatch(r"\d{3,6}", text):
         result.append("name")
 
 
@@ -53,6 +48,27 @@ def score_name(text, box=None):
     exclude_words = [
         "毛发",
         "头发",
+        "人员性别",
+        "迪安鉴科",
+        "安鉴科",
+        "员性别",
+        "人员姓名",
+        "员姓名",
+        "提取地点",
+        "取地点",
+        "样本编号",
+        "毛发种类",
+        "取样单位",
+        "发种类",
+        "提取时间",
+        "取时间",
+        "羊本编号",
+        "本编号",
+        "编号",
+        "腋毛",
+        "阴毛",
+        "眉毛",
+        "其他",
         "毒检毛发检测",
         "身份证号",
         "证号",
@@ -112,11 +128,6 @@ def score_sample_no(text):
     # 12位数字
     if re.fullmatch(r"\d{12}", text):
         score += 100
-
-
-    # 数字/数字
-    if re.match(r"^\d+/\d+$", text):
-        score += 80
 
 
     # 身份证

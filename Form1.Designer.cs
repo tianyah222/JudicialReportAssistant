@@ -1,4 +1,4 @@
-﻿namespace 初筛更名助手
+﻿namespace 初筛工具箱
 {
     partial class Form1
     {
@@ -103,7 +103,7 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Name = "Form1";
-            Text = "初筛更名助手";
+            Text = "初筛工具箱";
             ResumeLayout(false);
             PerformLayout();
         }

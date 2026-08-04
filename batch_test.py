@@ -8,7 +8,7 @@ import json
 # ===============================
 
 # 测试图片文件夹
-image_folder = r"C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\测试图片"
+image_folder = r"C:\Users\Administrator\source\repos\初筛工具箱\初筛工具箱\测试图片"
 
 
 # Python路径
@@ -19,7 +19,7 @@ python_exe = (
 
 # rapidocr.py路径
 rapidocr_py = (
-    r"C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\rapidocr.py"
+    r"C:\Users\Administrator\source\repos\初筛工具箱\初筛工具箱\rapidocr.py"
 )
 
 

@@ -17,7 +17,7 @@ img = Image.open(image_path)
 all_result = []
 
 
-for angle in [0, 90, 180, 270]:
+for angle in [0]:
 
     temp = img.rotate(
         angle,

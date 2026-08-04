@@ -9,7 +9,7 @@ import sys
 # ==============================
 
 # 图片目录
-IMAGE_DIR = r"C:\Users\Administrator\source\repos\初筛更名助手\初筛更名助手\测试图片"
+IMAGE_DIR = r"C:\Users\Administrator\source\repos\初筛工具箱\初筛工具箱\测试图片"
 
 
 # rapidocr.py路径

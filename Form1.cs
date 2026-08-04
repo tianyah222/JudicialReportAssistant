@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Windows.Forms;
 
-namespace 初筛更名助手
+namespace 初筛工具箱
 {
     public partial class Form1 : Form
     {
@@ -96,7 +96,7 @@ namespace 初筛更名助手
             int count = 0;
 
             string log =
-                "初筛更名助手修改记录\r\n"
+                "初筛工具箱修改记录\r\n"
                 + DateTime.Now
                 + "\r\n\r\n";
 

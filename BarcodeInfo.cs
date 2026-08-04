@@ -1,6 +1,6 @@
 ﻿using System.Drawing;
 
-namespace 初筛更名助手
+namespace 初筛工具箱
 {
     public class BarcodeInfo
     {

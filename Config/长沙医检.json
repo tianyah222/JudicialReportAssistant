@@ -1,0 +1,29 @@
+{
+  "Name":"长沙医检",
+
+  "NameArea":
+  {
+    "X":200,
+    "Y":420,
+    "Width":300,
+    "Height":80
+  },
+
+  "IDArea":
+  {
+    "X":200,
+    "Y":520,
+    "Width":400,
+    "Height":80
+  },
+
+  "LabelArea":
+  {
+    "X":150,
+    "Y":250,
+    "Width":700,
+    "Height":500
+  },
+
+  "NeedID":true
+}

@@ -1,4 +1,7 @@
-﻿namespace 初筛更名助手
+﻿using NPOI.SS.UserModel;
+using NPOI.XSSF.UserModel;
+
+namespace 初筛工具箱
 {
     partial class HairOCRForm
     {
@@ -45,6 +48,8 @@
             btnRotateLeft = new Button();
             btnRotateRight = new Button();
             btnSaveArea = new Button();
+            cmbClient = new ComboBox();
+            lblClient = new Label();
             ((System.ComponentModel.ISupportInitialize)dgvResult).BeginInit();
             ((System.ComponentModel.ISupportInitialize)picPreview).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pbPhoto).BeginInit();
@@ -93,10 +98,10 @@
             dgvResult.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             dgvResult.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvResult.Columns.AddRange(new DataGridViewColumn[] { colImage, colName, colID, colTag, colStatus });
-            dgvResult.Location = new Point(12, 642);
+            dgvResult.Location = new Point(829, 249);
             dgvResult.Name = "dgvResult";
             dgvResult.ReadOnly = true;
-            dgvResult.Size = new Size(950, 300);
+            dgvResult.Size = new Size(941, 545);
             dgvResult.TabIndex = 4;
             dgvResult.CellClick += dgvResult_CellClick;
             dgvResult.CellContentClick += dgvResult_CellContentClick;
@@ -133,12 +138,13 @@
             // 
             // btnExport
             // 
-            btnExport.Location = new Point(1072, 712);
+            btnExport.Location = new Point(903, 90);
             btnExport.Name = "btnExport";
             btnExport.Size = new Size(75, 23);
             btnExport.TabIndex = 5;
             btnExport.Text = "导出Excel";
             btnExport.UseVisualStyleBackColor = true;
+            btnExport.Click += btnExport_Click;
             // 
             // picPreview
             // 
@@ -151,9 +157,9 @@
             // 
             // pbPhoto
             // 
-            pbPhoto.Location = new Point(12, 136);
+            pbPhoto.Location = new Point(12, 249);
             pbPhoto.Name = "pbPhoto";
-            pbPhoto.Size = new Size(950, 500);
+            pbPhoto.Size = new Size(800, 545);
             pbPhoto.SizeMode = PictureBoxSizeMode.Zoom;
             pbPhoto.TabIndex = 7;
             pbPhoto.TabStop = false;
@@ -202,11 +208,31 @@
             btnSaveArea.UseVisualStyleBackColor = true;
             btnSaveArea.Click += btnSaveArea_Click;
             // 
+            // cmbClient
+            // 
+            cmbClient.FormattingEnabled = true;
+            cmbClient.Location = new Point(956, 186);
+            cmbClient.Name = "cmbClient";
+            cmbClient.Size = new Size(121, 25);
+            cmbClient.TabIndex = 12;
+            cmbClient.SelectedIndexChanged += cmbClient_SelectedIndexChanged;
+            // 
+            // lblClient
+            // 
+            lblClient.AutoSize = true;
+            lblClient.Location = new Point(882, 189);
+            lblClient.Name = "lblClient";
+            lblClient.Size = new Size(56, 17);
+            lblClient.TabIndex = 13;
+            lblClient.Text = "委托方：";
+            // 
             // HairOCRForm
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1565, 775);
+            ClientSize = new Size(1782, 928);
+            Controls.Add(lblClient);
+            Controls.Add(cmbClient);
             Controls.Add(btnSaveArea);
             Controls.Add(btnRotateRight);
             Controls.Add(btnRotateLeft);
@@ -249,5 +275,7 @@
         private DataGridViewTextBoxColumn colTag;
         private DataGridViewTextBoxColumn colStatus;
         private Button btnSaveArea;
+        private ComboBox cmbClient;
+        private Label lblClient;
     }
 }

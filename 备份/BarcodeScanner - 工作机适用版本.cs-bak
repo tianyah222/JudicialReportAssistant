@@ -95,50 +95,32 @@ namespace 初筛工具箱
             }
         }
         private Rectangle FindWhiteLabel(
-     Bitmap image,
-     Rectangle barcodeRect)
+      Bitmap image,
+      Rectangle barcodeRect)
         {
             Rectangle label;
 
 
-            // 条码尺寸
-            int bw = barcodeRect.Width;
-            int bh = barcodeRect.Height;
-
-
-            if (bw > bh)
+            //横向条码
+            if (barcodeRect.Width > barcodeRect.Height)
             {
-                // 横向条码
-
                 label = new Rectangle(
-
-                    barcodeRect.X - bw * 2,
-
-                    barcodeRect.Y - bh * 6,
-
-                    bw * 6,
-
-                    bh * 14
-
+                    barcodeRect.X - 100,
+                    barcodeRect.Y - 120,
+                    450,
+                    280
                 );
             }
             else
             {
-                // 纵向条码
-
+                //纵向条码
                 label = new Rectangle(
-
-                    barcodeRect.X - bw,
-
-                    barcodeRect.Y - bh,
-
-                    bw * 5,
-
-                    bh * 3
-
+                    barcodeRect.X - 180,
+                    barcodeRect.Y - 120,
+                    350,
+                    500
                 );
             }
-
 
 
             label = Rectangle.Intersect(
@@ -150,6 +132,11 @@ namespace 初筛工具箱
                     image.Height
                 )
             );
+
+
+            // MessageBox.Show(
+            // "生成标签区域：" + label.ToString()
+            //  );
 
 
             return label;
@@ -196,22 +183,19 @@ namespace 初筛工具箱
                 case 0:
                     break;
 
-                    // ZXing尝试顺时针90
-                    // 恢复需要逆时针90
+                case 1:
                     result.RotateFlip(
-                        RotateFlipType.Rotate270FlipNone);
+                        RotateFlipType.Rotate90FlipNone);
                     break;
-
 
                 case 2:
                     result.RotateFlip(
                         RotateFlipType.Rotate180FlipNone);
                     break;
 
-
                 case 3:
                     result.RotateFlip(
-                        RotateFlipType.Rotate90FlipNone);
+                        RotateFlipType.Rotate270FlipNone);
                     break;
             }
 
@@ -263,106 +247,28 @@ namespace 初筛工具箱
            TryInverted = true,
 
            PossibleFormats = new List<BarcodeFormat>
-{
-    BarcodeFormat.CODE_128,
-    BarcodeFormat.CODE_39,
-    BarcodeFormat.ITF
-}
+           {
+            BarcodeFormat.CODE_128
+           }
        }
    };
 
-                        int[] scales = { 2, 3, 4 };
-
-                        Result result = null;
-                        Bitmap resizeImage = null;
-
-
-                        foreach (int scale in scales)
+                        Bitmap resizeImage = new Bitmap(
+        testImage.Width * 2,
+        testImage.Height * 2
+    );
+                        using (Graphics g = Graphics.FromImage(resizeImage))
                         {
-
-                            resizeImage = new Bitmap(
-                                testImage.Width * scale,
-                                testImage.Height * scale
+                            g.DrawImage(
+                                testImage,
+                                0,
+                                0,
+                                resizeImage.Width,
+                                resizeImage.Height
                             );
-
-
-                            using (Graphics g = Graphics.FromImage(resizeImage))
-                            {
-
-                                g.DrawImage(
-                                    testImage,
-                                    0,
-                                    0,
-                                    resizeImage.Width,
-                                    resizeImage.Height
-                                );
-
-                            }
-
-                            Bitmap gray = new Bitmap(
-    resizeImage.Width,
-    resizeImage.Height
-);
-
-                            using (Graphics g = Graphics.FromImage(gray))
-                            {
-                                var cm = new System.Drawing.Imaging.ColorMatrix(
-                                    new float[][]
-                                    {
-            new float[]{0.3f,0.3f,0.3f,0,0},
-            new float[]{0.59f,0.59f,0.59f,0,0},
-            new float[]{0.11f,0.11f,0.11f,0,0},
-            new float[]{0,0,0,1,0},
-            new float[]{0,0,0,0,1}
-                                    });
-
-
-                                using (var attr =
-                                    new System.Drawing.Imaging.ImageAttributes())
-                                {
-                                    attr.SetColorMatrix(cm);
-
-
-                                    g.DrawImage(
-                                        resizeImage,
-                                        new Rectangle(
-                                            0,
-                                            0,
-                                            gray.Width,
-                                            gray.Height
-                                        ),
-                                        0,
-                                        0,
-                                        resizeImage.Width,
-                                        resizeImage.Height,
-                                        GraphicsUnit.Pixel,
-                                        attr
-                                    );
-                                }
-                            }
-
-
-                            result = reader.Decode(gray);
-
-
-                            gray.Dispose();
-                            result = reader.Decode(resizeImage);
-
-
-                            if (result != null)
-                            {
-                                Console.WriteLine(
-                                    "ZXing成功，倍率：" + scale
-                                );
-
-                                break;
-                            }
-
-
-                            resizeImage.Dispose();
-                            resizeImage = null;
-
                         }
+                        var result =
+                            reader.Decode(resizeImage);
                         //第一次失败，尝试灰度增强
                         if (result == null)
                         {
@@ -407,7 +313,7 @@ namespace 初筛工具箱
                         if (result == null)
                         {
                             Console.WriteLine(
-                                "第" + i + "方向识别失败"
+                                "第" + i + "次旋转失败"
                             );
                         }
 
@@ -519,13 +425,21 @@ namespace 初筛工具箱
                                     Path.GetFileName(imagePath)
                                 );
 
-       
-                                {
-
-                                    using (Bitmap ocrImage = original.Clone(
+                                using (Bitmap cropLabel = original.Clone(
     labelRect,
     original.PixelFormat))
+                                {
 
+                                    Bitmap correctLabel =
+                                        RotateLabel(
+                                            cropLabel,
+                                            i
+                                        );
+
+
+                                    using (Bitmap ocrImage = original.Clone(
+     labelRect,
+     original.PixelFormat))
                                     {
 
                                         string ocrPath = Path.Combine(
@@ -538,7 +452,11 @@ namespace 初筛工具箱
                                         ocrImage.Save(ocrPath);
 
 
-                                       
+                                        OCRHelper ocr = new OCRHelper();
+
+
+                                        string ocrText =
+                                            ocr.ReadText(ocrPath);
 
 
                                         // MessageBox.Show(ocrText);
